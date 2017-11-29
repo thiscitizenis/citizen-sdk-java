@@ -42,22 +42,22 @@ The project has examples of the following operations, which can be found in Exam
 The project can be built with the command:
 
 ```
-  mvn clean install
+mvn clean install
 ```
 
 The examples can be run with the command:
 
 ```
-  java -jar target/sdk-1.0-SNAPSHOT-jar-with-dependencies.jar -runExamples
+java -jar target/sdk-1.0-SNAPSHOT-jar-with-dependencies.jar -runExamples
 ```
 
 Authentication and cryptographic key pairs can also be generated, but running the following commands:
 
 
 ```
-  java -jar target/sdk-1.0-SNAPSHOT-jar-with-dependencies.jar -authKey <keyPassword>
+java -jar target/sdk-1.0-SNAPSHOT-jar-with-dependencies.jar -authKey <keyPassword>
 ```
 
 ```
-  java -jar target/sdk-1.0-SNAPSHOT-jar-with-dependencies.jar -cryptoKey <keyPassword>
+java -jar target/sdk-1.0-SNAPSHOT-jar-with-dependencies.jar -cryptoKey <keyPassword>
 ```
