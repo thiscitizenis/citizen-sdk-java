@@ -19,11 +19,11 @@ import java.util.List;
 
 
 public class RestClient {
-    public String BaseUrl = Constant.CITIZEN_API_URL;
-
     public String apiHost = Constant.CITIZEN_PRODUCTION_API_HOST;
     public int apiPort = Constant.CITIZEN_PRODUCTION_API_PORT;
     public boolean apiSecure = Constant.CITIZEN_PRODUCTION_API_SECURE;
+
+    public String BaseUrl;
 
     private static RestClient instance;
 

@@ -12,15 +12,14 @@ public final class Constant {
     public static final int     CITIZEN_DEVELOPMENT_API_PORT               = 443;
     public static final boolean CITIZEN_DEVELOPMENT_API_SECURE             = true;
 
-    public static final String  CITIZEN_API_URL                            = "http://localhost:8443/";
-
     public static final String  CITIZEN_USER_RESOURCE                      = "users",
                                 CITIZEN_SESSION_RESOURCE                   = "sessions",
                                 CITIZEN_TOKEN_RESOURCE                     = "tokens",
                                 CITIZEN_PERSON_RESOURCE                    = "persons",
                                 CITIZEN_PHONE_RESOURCE                     = "phones",
                                 CITIZEN_WEBAPP_RESOURCE                    = "webapp",
-                                CITIZEN_ENTITY_RESOURCE                    = "entities";
+                                CITIZEN_ENTITY_RESOURCE                    = "entities",
+                                CITIZEN_PUBLIC_RESOURCE                    = "public";
 
     public static final String  CITIZEN_AUTHORISATION_HEADER_NAME          = "AuthorizationCitizen",
                                 CITIZEN_SECRET_HEADER_NAME                 = "X-code",

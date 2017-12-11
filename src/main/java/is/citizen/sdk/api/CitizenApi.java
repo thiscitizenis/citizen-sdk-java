@@ -33,6 +33,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
     private boolean apiSecure = Constant.CITIZEN_PRODUCTION_API_SECURE;
 
     private RestClient restClient;
+    private CitizenCrypto citizenCrypto;
 
     private boolean debug = false;
 
@@ -45,6 +46,8 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         restClient.setApiHost(apiHost);
         restClient.setApiPort(apiPort);
         restClient.setApiSecure(apiSecure);
+
+        citizenCrypto = new CitizenCrypto();
     }
 
     private List<LoggingCallback> loggingCallbacks = new ArrayList<LoggingCallback>();
@@ -74,9 +77,9 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         }
 
         try {
-            Optional<KeyHolder> keyHolder = CitizenCrypto.generateAuthenticationKeyPair(password);
+            KeyHolder keyHolder = citizenCrypto.generateAuthenticationKeyPair(password);
             log(Constant.CITIZEN_CRYPTO_SUCCESS, "INFO: generated auth key pair");
-            return keyHolder;
+            return Optional.of(keyHolder);
         } catch (CryptoException e) {
             log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
         }
@@ -97,9 +100,9 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         }
 
         try {
-            Optional<KeyHolder> keyHolder = CitizenCrypto.generateCryptoKeyPair(password);
+            KeyHolder keyHolder = citizenCrypto.generateCryptoKeyPair(password);
             log(Constant.CITIZEN_CRYPTO_SUCCESS, "INFO: generated crypto key pair");
-            return keyHolder;
+            return Optional.of(keyHolder);
         } catch (CryptoException e) {
             log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
         }
@@ -937,7 +940,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
 
         String singedTransaction = "";
         try {
-            singedTransaction = CitizenCrypto.signData(loginTransaction.toByteArray(), privateKey, keyPassword);
+            singedTransaction = citizenCrypto.signData(loginTransaction.toByteArray(), privateKey, keyPassword);
         } catch (CryptoException e) {
             log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
             return Optional.empty();
@@ -1526,7 +1529,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
 
         try {
             byte[] dataToSign = token.getId().getBytes("utf-8");
-            String signedTokenId = CitizenCrypto.signData(dataToSign, encodedPrivateKey, secret);
+            String signedTokenId = citizenCrypto.signData(dataToSign, encodedPrivateKey, secret);
 
             if (token.getMetaData() == null) {
                 token.setMetaData(new HashMap());
@@ -1579,7 +1582,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         boolean result = false;
 
         try {
-            result = CitizenCrypto.verifySignature(token.getId().getBytes("utf-8"), Base64.decode(tokenSignature), publicKey);
+            result = citizenCrypto.verifySignature(token.getId().getBytes("utf-8"), Base64.decode(tokenSignature), publicKey);
             log(Constant.CITIZEN_CRYPTO_SUCCESS, "INFO: verified signed token: " + token.getId() + " result: " + restClient);
         } catch (UnsupportedEncodingException e) {
             log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
@@ -1609,7 +1612,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         }
 
         try {
-            Optional<Map> decMap = CitizenCrypto.decryptMap(token.getMetaData(), privateKey, secret);
+            Optional<Map<String, String>> decMap = citizenCrypto.decryptMap(token.getMetaData(), privateKey, secret);
             decMap.ifPresent(token::setMetaData);
             log(Constant.CITIZEN_CRYPTO_SUCCESS, "INFO: decrypted token: " + token.getId());
             return Optional.of(token);
@@ -1637,7 +1640,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         jwt = jwt.replaceAll("\"", "");
 
         try {
-            boolean result = CitizenCrypto.verifyCitizenJwt(jwt, publicKey);
+            boolean result = citizenCrypto.verifyCitizenJwt(jwt, publicKey);
             log(Constant.CITIZEN_CRYPTO_SUCCESS, "INFO: verified JWT");
             return result;
         } catch (CryptoException e) {
