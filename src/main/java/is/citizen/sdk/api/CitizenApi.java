@@ -17,6 +17,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.*;
 
 public class CitizenApi implements WebStompClient.LoggingCallback {
@@ -103,6 +105,84 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
             KeyHolder keyHolder = citizenCrypto.generateCryptoKeyPair(password);
             log(Constant.CITIZEN_CRYPTO_SUCCESS, "INFO: generated crypto key pair");
             return Optional.of(keyHolder);
+        } catch (CryptoException e) {
+            log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Convert an authentication public key from the Citizen Service into a Java {@link PublicKey}
+     *
+     * @param publicKeyString authentication public key in Base 64 encoded DER format.
+     *
+     * @return {@link PublicKey} converted public key
+     */
+    public Optional<PublicKey> convertAuthPublicKey(String publicKeyString) {
+
+        try {
+            PublicKey publicKey = citizenCrypto.getPublicAuthKeyFromEncodedString(publicKeyString);
+            return Optional.of(publicKey);
+        } catch (CryptoException e) {
+            log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Convert an encrypted authentication private key from the Citizen Service into a Java {@link PrivateKey}
+     *
+     * @param privateKeyString encrypted authentication private key.
+     * @param password password for the encrypted private key
+     *
+     * @return {@link PrivateKey} converted private key
+     */
+    public Optional<PrivateKey> convertAuthPrivateKey(String privateKeyString, String password) {
+
+        try {
+            PrivateKey privateKey = citizenCrypto.getPrivateAuthKeyFromEncodedEncryptedString(privateKeyString, password);
+            return Optional.of(privateKey);
+        } catch (CryptoException e) {
+            log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Convert an crypto public key from the Citizen Service into a Java {@link PublicKey}
+     *
+     * @param publicKeyString crypto public key in Base 64 encoded DER format.
+     *
+     * @return {@link PublicKey} converted public key
+     */
+    public Optional<PublicKey> convertCryptoPublicKey(String publicKeyString) {
+
+        try {
+            PublicKey publicKey = citizenCrypto.getPublicCryptoKeyFromEncodedString(publicKeyString);
+            return Optional.of(publicKey);
+        } catch (CryptoException e) {
+            log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Convert an encrypted crypto private key from the Citizen Service into a Java {@link PrivateKey}
+     *
+     * @param privateKeyString encrypted crypto private key.
+     * @param password password for the encrypted private key
+     *
+     * @return {@link PrivateKey} converted private key
+     */
+    public Optional<PrivateKey> convertCryptoPrivateKey(String privateKeyString, String password) {
+
+        try {
+            PrivateKey privateKey = citizenCrypto.getPrivateCryptoKeyFromEncodedEncryptedString(privateKeyString, password);
+            return Optional.of(privateKey);
         } catch (CryptoException e) {
             log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
         }

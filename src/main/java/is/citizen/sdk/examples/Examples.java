@@ -11,6 +11,8 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,6 +54,17 @@ public class Examples {
         System.out.println("********************************\n");
 
         //
+        // Convert the key pair to Java PublicKey and PrivateKey objects.
+        //
+
+        PublicKey javaAuthPublicKey = citizenApi.convertAuthPublicKey(authPublicKey).get();
+        PrivateKey javaAuthPrivateKey = citizenApi.convertAuthPrivateKey(authPrivateKey, "secret").get();
+
+        System.out.println("********************************");
+        System.out.println("Converted auth key pair to Java PublicKey and PrivateKey objects");
+        System.out.println("********************************\n");
+
+        //
         // Generate a key pair for encryption.
         //
 
@@ -64,6 +77,17 @@ public class Examples {
         System.out.println("Generated key pair:");
         System.out.println("Public key: " + authPublicKey);
         System.out.println("Private key: " + authPrivateKey);
+        System.out.println("********************************\n");
+
+        //
+        // Convert the key pair to Java PublicKey and PrivateKey objects.
+        //
+
+        PublicKey javaCryptoPublicKey = citizenApi.convertAuthPublicKey(cryptoPublicKey).get();
+        PrivateKey javaCryptoPrivateKey = citizenApi.convertAuthPrivateKey(cryptoPrivateKey, "secret").get();
+
+        System.out.println("********************************");
+        System.out.println("Converted crypto key pair to Java PublicKey and PrivateKey objects");
         System.out.println("********************************\n");
 
         //

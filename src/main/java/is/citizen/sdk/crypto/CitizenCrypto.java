@@ -126,14 +126,14 @@ public class CitizenCrypto {
      */
     public String signData(byte[] dataToSign, String encodedPrivateKey, String secret) {
 		try {
-            PrivateKey privateKey = getPrivateKeyFromEncodedEncryptedString(encodedPrivateKey, secret);
+            PrivateKey privateKey = getPrivateAuthKeyFromEncodedEncryptedString(encodedPrivateKey, secret);
 			Signature signature = Signature.getInstance(AUTH_SIGNATURE_ALGORITHM);
 			signature.initSign(privateKey);
 			signature.update(dataToSign);
 			byte[] signedText = signature.sign();
 			return Base64.getEncoder().encodeToString(signedText);
 		} catch (IllegalArgumentException | NoSuchAlgorithmException | InvalidKeyException |
-                 IOException | SignatureException e) {
+                 SignatureException e) {
             throw new CryptoException("Unable to sign message: " + e.getMessage(), e);
 		}
     }
@@ -257,10 +257,10 @@ public class CitizenCrypto {
         try {
             if (StringUtils.hasText(inputString)) {
                 byte[] cipherText;
-                cipherText = encrypt(inputString.getBytes("UTF8"), getPublicKeyFromEncodedString(publicKey));
+                cipherText = encrypt(inputString.getBytes("UTF8"), getPublicCryptoKeyFromEncodedString(publicKey));
                 encryptedText = Base64.getEncoder().encodeToString(cipherText);
             }
-        } catch (UnsupportedEncodingException | InvalidKeySpecException | NoSuchAlgorithmException |
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException |
                  NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             throw new CryptoException("Unable to encrypt string: " + e.getMessage(), e);
         }
@@ -285,7 +285,7 @@ public class CitizenCrypto {
 
         try {
             if (StringUtils.hasText(inputString)) {
-                PrivateKey privateKey = getPrivateKeyFromEncodedEncryptedString(encryptedPrivateKey, secret);
+                PrivateKey privateKey = getPrivateCryptoKeyFromEncodedEncryptedString(encryptedPrivateKey, secret);
 
                 byte[] decryptedText = decrypt(Base64.getDecoder().decode(inputString), privateKey);
                 result = new String(decryptedText, "UTF8");
@@ -306,14 +306,12 @@ public class CitizenCrypto {
      *
      * @return boolean indicating whether the verification was successful
      */
-    public boolean verifyCitizenJwt(String jwt, String encodedPublicKey) {
-        try {
-            PublicKey signingPublicKey = getPublicKeyFromEncodedString(encodedPublicKey);
-            Claims jwtClaims = Jwts.parser().setSigningKey(signingPublicKey).parseClaimsJws(jwt).getBody();
-            return jwtClaims.get(Constant.CITIZEN_JWT_AUTHENTICATED_CLAIM, Boolean.class);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new CryptoException("Unable to verify JWT: " + e.getMessage(), e);
-        }
+    public boolean verifyCitizenJwt(String jwt, String encodedPublicKey)
+        throws CryptoException {
+
+        PublicKey signingPublicKey = getPublicCryptoKeyFromEncodedString(encodedPublicKey);
+        Claims jwtClaims = Jwts.parser().setSigningKey(signingPublicKey).parseClaimsJws(jwt).getBody();
+        return jwtClaims.get(Constant.CITIZEN_JWT_AUTHENTICATED_CLAIM, Boolean.class);
     }
 
     /**
@@ -396,27 +394,31 @@ public class CitizenCrypto {
     }
 
      /**
-     * Decrypt a private key and convert it to {@link PrivateKey}
+     * Decrypt a private crypto key and convert it to {@link PrivateKey}
      *
      * @param encodedEncryptedPrivateKey encrypted private key, can be base 64 encoded
      * @param password            password to decrypt
       *
      * @return {@link PrivateKey}
      */
-    private PrivateKey getPrivateKeyFromEncodedEncryptedString(final String encodedEncryptedPrivateKey, final String password)
-            throws IOException {
+    public PrivateKey getPrivateCryptoKeyFromEncodedEncryptedString(final String encodedEncryptedPrivateKey, final String password)
+            throws CryptoException {
 
-        String encryptedPrivateKey = new String(Base64.getDecoder().decode(encodedEncryptedPrivateKey));
+        try {
+            String encryptedPrivateKey = new String(Base64.getDecoder().decode(encodedEncryptedPrivateKey));
 
-        PEMKeyPair pemKeyPair = getEncryptedPEMKeyPair(encryptedPrivateKey, password);
+            PEMKeyPair pemKeyPair = getEncryptedPEMKeyPair(encryptedPrivateKey, password);
 
-        JcaPEMKeyConverter jcaPEMKeyConverter = new JcaPEMKeyConverter();
+            JcaPEMKeyConverter jcaPEMKeyConverter = new JcaPEMKeyConverter();
 
-        return jcaPEMKeyConverter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
+            return jcaPEMKeyConverter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
+        } catch (IOException e) {
+            throw new CryptoException("Unable to get crypto private key from encoded string", e);
+        }
     }
 
     /**
-     * Generates a {@link PublicKey} from a Base 64 encoded DER public key
+     * Generates a {@link PublicKey} from a Base 64 encoded DER public crypto key
      *
      * @param key Base 64 encoded string which represents the key
      *
@@ -424,12 +426,58 @@ public class CitizenCrypto {
      *
      * @throws java.lang.Exception
      */
-    public PublicKey getPublicKeyFromEncodedString(String key)
-        throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public PublicKey getPublicCryptoKeyFromEncodedString(String key)
+        throws CryptoException {
 
-        KeyFactory keyFactory = KeyFactory.getInstance(CRYPTO_ALGORITHM);
-        EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(key));
-        return keyFactory.generatePublic(publicKeySpec);
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance(CRYPTO_ALGORITHM);
+            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(key));
+            return keyFactory.generatePublic(publicKeySpec);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            throw new CryptoException("Unable to get crypto public key from encoded string", e);
+        }
+    }
+
+    /**
+     * Decrypt a private crypto key and convert it to {@link PrivateKey}
+     *
+     * @param encodedEncryptedPrivateKey encrypted private key, can be base 64 encoded
+     * @param password            password to decrypt
+      *
+     * @return {@link PrivateKey}
+     */
+    public PrivateKey getPrivateAuthKeyFromEncodedEncryptedString(final String encodedEncryptedPrivateKey, final String password)
+            throws CryptoException {
+        try {
+            String encryptedPrivateKey = new String(Base64.getDecoder().decode(encodedEncryptedPrivateKey));
+            PEMKeyPair pemKeyPair = getEncryptedPEMKeyPair(encryptedPrivateKey, password);
+            JcaPEMKeyConverter jcaPEMKeyConverter = new JcaPEMKeyConverter();
+
+            return jcaPEMKeyConverter.getPrivateKey(pemKeyPair.getPrivateKeyInfo());
+        } catch (IOException e) {
+            throw new CryptoException("Unable to get private key from encoded string", e);
+        }
+    }
+
+    /**
+     * Generates a {@link PublicKey} from a Base 64 encoded DER public crypto key
+     *
+     * @param key Base 64 encoded string which represents the key
+     *
+     * @return {@link PublicKey}
+     *
+     * @throws java.lang.Exception
+     */
+    public PublicKey getPublicAuthKeyFromEncodedString(String key)
+        throws CryptoException {
+
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance(AUTH_ALGORITHM);
+            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(key));
+            return keyFactory.generatePublic(publicKeySpec);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            throw new CryptoException("Unable to get auth public key from encoded string", e);
+        }
     }
 
     /**
