@@ -176,7 +176,7 @@ Tokens encapsulate the data relationship between businesses and users. A busines
 
 The first step of the process is that a business creates a token, which may be done with code like the following through the SDK:
 
-``
+```
   int access = 0;
   access = AccessType.add(access, AccessType.NAME);
   access = AccessType.add(access, AccessType.DOB);
