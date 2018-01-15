@@ -93,7 +93,7 @@ A logging callback may also be registered. This returns a status code and log me
 
 ### Generating Key Pairs
 
-The Citizen Service uses public/private key pairs for encryption and for authentication. RSA 2048 bit keys are used for encryption. Authentication uses ECDSA signatures with EC secp256r1 (aka P-256 aka prime256v1) keys. 
+The Citizen Service uses public/private key pairs for encryption and for authentication. RSA 2048 bit keys are used for encryption. Authentication uses ECDSA signatures with EC secp256r1 (aka P-256 aka prime256v1) keys. The two types of keys are referred to as 'crypto' and 'auth' keys throughout the SDK.
 
 The SDK can be used to generate and manage keys for both encryption and authentication. When a key pair is generated, it is returned in a KeyHolder object, which contains the public and private keys encoded in Base 64. The public key is in Base 64 encoded DER format. The private key is symmetrically encrypted using a password. Having the keys encoded as Base 64 strings is convenient for storage.
 

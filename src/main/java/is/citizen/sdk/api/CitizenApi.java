@@ -69,7 +69,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
     /**
      * Generate an EC secp256r1 key for use with authentication and signing.
      *
-     * @return {@link KeyHolder} containing the public and private keys.
+     * @return {@link KeyHolder} containing the public and private keys or empty Optional upon error.
      */
 
     public Optional<KeyHolder> generateAuthKeyPair(String password) {
@@ -92,7 +92,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
     /**
      * Generate a RSA 2048 bit key for use with encryption and decryption.
      *
-     * @return {@link KeyHolder} containing the public and private keys.
+     * @return Optional {@link KeyHolder} containing the public and private keys or empty Optional upon error.
      */
 
     public Optional<KeyHolder> generateCryptoKeyPair(String password) {
@@ -117,7 +117,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      *
      * @param publicKeyString authentication public key in Base 64 encoded DER format.
      *
-     * @return {@link PublicKey} converted public key
+     * @return Optional {@link PublicKey} converted public key or empty Optional upon error.
      */
     public Optional<PublicKey> convertAuthPublicKey(String publicKeyString) {
 
@@ -137,7 +137,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      * @param privateKeyString encrypted authentication private key.
      * @param password password for the encrypted private key
      *
-     * @return {@link PrivateKey} converted private key
+     * @return Optional {@link PrivateKey} converted private key or empty Optional upon error.
      */
     public Optional<PrivateKey> convertAuthPrivateKey(String privateKeyString, String password) {
 
@@ -156,7 +156,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      *
      * @param publicKeyString crypto public key in Base 64 encoded DER format.
      *
-     * @return {@link PublicKey} converted public key
+     * @return Optional {@link PublicKey} converted public key or empty Optional upon error.
      */
     public Optional<PublicKey> convertCryptoPublicKey(String publicKeyString) {
 
@@ -176,7 +176,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      * @param privateKeyString encrypted crypto private key.
      * @param password password for the encrypted private key
      *
-     * @return {@link PrivateKey} converted private key
+     * @return Optional {@link PrivateKey} converted private key or empty Optional upon error.
      */
     public Optional<PrivateKey> convertCryptoPrivateKey(String privateKeyString, String password) {
 
