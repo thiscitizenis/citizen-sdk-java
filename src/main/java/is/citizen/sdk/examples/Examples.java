@@ -57,8 +57,8 @@ public class Examples {
         // Convert the key pair to Java PublicKey and PrivateKey objects.
         //
 
-        PublicKey javaAuthPublicKey = citizenApi.convertAuthPublicKey(authPublicKey).get();
-        PrivateKey javaAuthPrivateKey = citizenApi.convertAuthPrivateKey(authPrivateKey, "secret").get();
+        PublicKey javaAuthPublicKey = citizenApi.convertAuthPublicKeyStringToJava(authPublicKey).get();
+        PrivateKey javaAuthPrivateKey = citizenApi.convertAuthPrivateKeyStringToJava(authPrivateKey, "secret").get();
 
         System.out.println("********************************");
         System.out.println("Converted auth key pair to Java PublicKey and PrivateKey objects");
@@ -83,8 +83,8 @@ public class Examples {
         // Convert the key pair to Java PublicKey and PrivateKey objects.
         //
 
-        PublicKey javaCryptoPublicKey = citizenApi.convertAuthPublicKey(cryptoPublicKey).get();
-        PrivateKey javaCryptoPrivateKey = citizenApi.convertAuthPrivateKey(cryptoPrivateKey, "secret").get();
+        PublicKey javaCryptoPublicKey = citizenApi.convertAuthPublicKeyStringToJava(cryptoPublicKey).get();
+        PrivateKey javaCryptoPrivateKey = citizenApi.convertAuthPrivateKeyStringToJava(cryptoPrivateKey, "secret").get();
 
         System.out.println("********************************");
         System.out.println("Converted crypto key pair to Java PublicKey and PrivateKey objects");

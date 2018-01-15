@@ -119,7 +119,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      *
      * @return Optional {@link PublicKey} converted public key or empty Optional upon error.
      */
-    public Optional<PublicKey> convertAuthPublicKey(String publicKeyString) {
+    public Optional<PublicKey> convertAuthPublicKeyStringToJava(String publicKeyString) {
 
         try {
             PublicKey publicKey = citizenCrypto.getPublicAuthKeyFromEncodedString(publicKeyString);
@@ -139,7 +139,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      *
      * @return Optional {@link PrivateKey} converted private key or empty Optional upon error.
      */
-    public Optional<PrivateKey> convertAuthPrivateKey(String privateKeyString, String password) {
+    public Optional<PrivateKey> convertAuthPrivateKeyStringToJava(String privateKeyString, String password) {
 
         try {
             PrivateKey privateKey = citizenCrypto.getPrivateAuthKeyFromEncodedEncryptedString(privateKeyString, password);
@@ -158,7 +158,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      *
      * @return Optional {@link PublicKey} converted public key or empty Optional upon error.
      */
-    public Optional<PublicKey> convertCryptoPublicKey(String publicKeyString) {
+    public Optional<PublicKey> convertCryptoPublicKeyStringToJava(String publicKeyString) {
 
         try {
             PublicKey publicKey = citizenCrypto.getPublicCryptoKeyFromEncodedString(publicKeyString);
@@ -178,7 +178,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      *
      * @return Optional {@link PrivateKey} converted private key or empty Optional upon error.
      */
-    public Optional<PrivateKey> convertCryptoPrivateKey(String privateKeyString, String password) {
+    public Optional<PrivateKey> convertCryptoPrivateKeyStringToJava(String privateKeyString, String password) {
 
         try {
             PrivateKey privateKey = citizenCrypto.getPrivateCryptoKeyFromEncodedEncryptedString(privateKeyString, password);
