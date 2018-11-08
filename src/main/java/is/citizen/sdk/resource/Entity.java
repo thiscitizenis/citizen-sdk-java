@@ -1,6 +1,7 @@
 package is.citizen.sdk.resource;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import is.citizen.sdk.enums.BillingMethod;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -10,86 +11,41 @@ import java.util.*;
 public class Entity implements Serializable {
     private static final long serialVersionUID = 1582368575301577135L;
 
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private String id;
-
-    @JsonView({CitizenView.User.Login.class})
     private String email;
-
-    @JsonView({CitizenView.User.Login.class})
     private String username;
-
-    @JsonView({CitizenView.User.FixMe.class})
     private String password;
-
-    @JsonView({CitizenView.User.FixMe.class})
     private String passPhrase;
-
-    @JsonView({CitizenView.User.Login.class})
     private String adminEmail;
-
-    @JsonView({CitizenView.User.Login.class})
     private String adminUsername;
-
-    @JsonView({CitizenView.User.FixMe.class})
     private String adminPassword;
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private String name;
-
-    @JsonView({CitizenView.User.Login.class})
     private Address address;
-
-    @JsonView({CitizenView.User.Login.class})
     private Phone phone;
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private String api;
-
-    @JsonView(CitizenView.User.Register.class)
     private String mnemonicCode;
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private String publicKey;
-
-    @JsonView(CitizenView.User.Register.class)
     private String authPublicKey;
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private String signingPublicKey;
-
-    @JsonView({CitizenView.User.Login.class})
     private List<WebHook> webHooks = new ArrayList<>();
-
-    @JsonView({CitizenView.User.Login.class})
     private Set<String> personIds = new HashSet<>();
-
-    @JsonView({CitizenView.User.Login.class})
     private Set<String> hashedAdminEmails = new HashSet<>();
-
-    @JsonView({CitizenView.User.Login.class})
     private Map<String, Email> emails = new HashMap<>();
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
+    private Map<String, DataAgreement> dataAgreements = new HashMap<>();
     private boolean hasJwtPasswordLoginWebHook;
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private boolean hasJwtTokenLoginWebHook;
-
-    @JsonView({CitizenView.User.Login.class})
     private String cryptoPublicKey;
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private String publicApiKey;
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private String companyNumber;
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private String issuingDomain;
-
-    @JsonView({CitizenView.User.Register.class, CitizenView.User.Login.class})
     private String tradingName;
+    private String referrerId;
+    private String relationshipsBillingId;
+    private BillingMethod relationshipsBillingMethod;
+    private String signInBillingId;
+    private BillingMethod signInBillingMethod;
+    private String addressLat;
+    private String addressLng;
 
     public String getId() {
         return id;
@@ -251,6 +207,14 @@ public class Entity implements Serializable {
         this.emails = emails;
     }
 
+    public Map<String, DataAgreement> getDataAgreements() {
+        return dataAgreements;
+    }
+
+    public void setDataAgreements(Map<String, DataAgreement> dataAgreements) {
+        this.dataAgreements = dataAgreements;
+    }
+
     public boolean getHasJwtPasswordLoginWebHook() {
         return hasJwtPasswordLoginWebHook;
     }
@@ -305,6 +269,62 @@ public class Entity implements Serializable {
 
     public void setTradingName(String tradingName) {
         this.tradingName = tradingName;
+    }
+
+    public String getReferrerId() {
+        return referrerId;
+    }
+
+    public void setReferrerId(String referrerId) {
+        this.referrerId = referrerId;
+    }
+
+    public String getRelationshipsBillingId() {
+        return relationshipsBillingId;
+    }
+
+    public void setRelationshipsBillingId(String relationshipsBillingId) {
+        this.relationshipsBillingId = relationshipsBillingId;
+    }
+
+    public BillingMethod getRelationshipsBillingMethod() {
+        return relationshipsBillingMethod;
+    }
+
+    public void setRelationshipsBillingMethod(BillingMethod relationshipsBillingMethod) {
+        this.relationshipsBillingMethod= relationshipsBillingMethod;
+    }
+
+    public String getSignInBillingId() {
+        return signInBillingId;
+    }
+
+    public void setSignInBillingId(String signInBillingId) {
+        this.signInBillingId = signInBillingId;
+    }
+
+    public BillingMethod getSignInBillingMethod() {
+        return signInBillingMethod;
+    }
+
+    public void setSignInBillingMethod(BillingMethod signInBillingMethod) {
+        this.signInBillingMethod = signInBillingMethod;
+    }
+
+    public String getAddressLat() {
+        return addressLat;
+    }
+
+    public void setAddressLat(String addressLat) {
+        this.addressLat = addressLat;
+    }
+
+    public String getAddressLng() {
+        return addressLng;
+    }
+
+    public void setAddressLng(String addressLng) {
+        this.addressLng = addressLng;
     }
 
     @Override

@@ -17,6 +17,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.*;
 
 public class CitizenApi implements WebStompClient.LoggingCallback {
@@ -30,7 +32,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
 
     private String apiHost = Constant.CITIZEN_PRODUCTION_API_HOST;
     private int apiPort = Constant.CITIZEN_PRODUCTION_API_PORT;
-    private boolean apiSecure = Constant.CITIZEN_PRODUCTION_API_SECURE;
+    private boolean apiSecure = Constant.CITIZEN_PRODUCTION_API_USE_TLS;
 
     private RestClient restClient;
     private CitizenCrypto citizenCrypto;
@@ -67,7 +69,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
     /**
      * Generate an EC secp256r1 key for use with authentication and signing.
      *
-     * @return {@link KeyHolder} containing the public and private keys.
+     * @return {@link KeyHolder} containing the public and private keys or empty Optional upon error.
      */
 
     public Optional<KeyHolder> generateAuthKeyPair(String password) {
@@ -90,7 +92,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
     /**
      * Generate a RSA 2048 bit key for use with encryption and decryption.
      *
-     * @return {@link KeyHolder} containing the public and private keys.
+     * @return Optional {@link KeyHolder} containing the public and private keys or empty Optional upon error.
      */
 
     public Optional<KeyHolder> generateCryptoKeyPair(String password) {
@@ -103,6 +105,84 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
             KeyHolder keyHolder = citizenCrypto.generateCryptoKeyPair(password);
             log(Constant.CITIZEN_CRYPTO_SUCCESS, "INFO: generated crypto key pair");
             return Optional.of(keyHolder);
+        } catch (CryptoException e) {
+            log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Convert an authentication public key from the Citizen Service into a Java {@link PublicKey}
+     *
+     * @param publicKeyString authentication public key in Base 64 encoded DER format.
+     *
+     * @return Optional {@link PublicKey} converted public key or empty Optional upon error.
+     */
+    public Optional<PublicKey> convertAuthPublicKeyStringToJava(String publicKeyString) {
+
+        try {
+            PublicKey publicKey = citizenCrypto.getPublicAuthKeyFromEncodedString(publicKeyString);
+            return Optional.of(publicKey);
+        } catch (CryptoException e) {
+            log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Convert an encrypted authentication private key from the Citizen Service into a Java {@link PrivateKey}
+     *
+     * @param privateKeyString encrypted authentication private key.
+     * @param password password for the encrypted private key
+     *
+     * @return Optional {@link PrivateKey} converted private key or empty Optional upon error.
+     */
+    public Optional<PrivateKey> convertAuthPrivateKeyStringToJava(String privateKeyString, String password) {
+
+        try {
+            PrivateKey privateKey = citizenCrypto.getPrivateAuthKeyFromEncodedEncryptedString(privateKeyString, password);
+            return Optional.of(privateKey);
+        } catch (CryptoException e) {
+            log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Convert an crypto public key from the Citizen Service into a Java {@link PublicKey}
+     *
+     * @param publicKeyString crypto public key in Base 64 encoded DER format.
+     *
+     * @return Optional {@link PublicKey} converted public key or empty Optional upon error.
+     */
+    public Optional<PublicKey> convertCryptoPublicKeyStringToJava(String publicKeyString) {
+
+        try {
+            PublicKey publicKey = citizenCrypto.getPublicCryptoKeyFromEncodedString(publicKeyString);
+            return Optional.of(publicKey);
+        } catch (CryptoException e) {
+            log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Convert an encrypted crypto private key from the Citizen Service into a Java {@link PrivateKey}
+     *
+     * @param privateKeyString encrypted crypto private key.
+     * @param password password for the encrypted private key
+     *
+     * @return Optional {@link PrivateKey} converted private key or empty Optional upon error.
+     */
+    public Optional<PrivateKey> convertCryptoPrivateKeyStringToJava(String privateKeyString, String password) {
+
+        try {
+            PrivateKey privateKey = citizenCrypto.getPrivateCryptoKeyFromEncodedEncryptedString(privateKeyString, password);
+            return Optional.of(privateKey);
         } catch (CryptoException e) {
             log(Constant.CITIZEN_CRYPTO_ERROR, getStackTrace(e));
         }
@@ -233,6 +313,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         if (apiKey != null) {
             restClient.clearApiHeaders();
             restClient.setApiKey(apiKey);
+            restClient.setSecret(secret);
         } else {
             log(Constant.CITIZEN_REST_GENERAL_ERROR, "ERROR: API key not set");
             return Optional.empty();
@@ -353,17 +434,17 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      * be set with the setApiKey() method.setSecret() methods respectively.
      *
      * @param entityId ID of the {@link Entity}
-     * @param userEmail user's entity email. This must be the same as the email address used in the
+     * @param userEntityEmail user's entity email. This must be the same as the email address used in the
      *                  setUserEntity() call.
      *
      * @return Optional {@link Entity}
      */
-    public Optional<Entity> addEntityUser(String entityId, String userEmail) {
+    public Optional<Entity> addEntityUser(String entityId, String userEntityEmail) {
 
         if (debug) {
              log(Constant.CITIZEN_GENERAL_INFO, "DEBUG: Add user to entity: " +
                      "(entityId: " + entityId + ", " +
-                     "userEmail: " + userEmail + ")");
+                     "userEmail: " + userEntityEmail + ")");
         }
 
         if (apiKey != null && secret != null) {
@@ -375,11 +456,13 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
             return Optional.empty();
         }
 
-        TextNode userEmailTextNode = new TextNode(userEmail);
+        User entityUser = new User();
+        entityUser.setEntityEmail(userEntityEmail);
+        entityUser.setIsAdmin(false);
 
         try {
-            Entity entity = restClient.patch(Constant.CITIZEN_ENTITY_RESOURCE + "/" + entityId + "/users", userEmailTextNode, Entity.class);
-            log(Constant.CITIZEN_REST_SUCCESS, "INFO: added user: " + userEmail + " to entity: " + entityId);
+            Entity entity = restClient.patch(Constant.CITIZEN_ENTITY_RESOURCE + "/" + entityId + "/entity-user", entityUser, Entity.class);
+            log(Constant.CITIZEN_REST_SUCCESS, "INFO: added user: " + userEntityEmail + " to entity: " + entityId);
             return Optional.of(entity);
         } catch (HttpStatusCodeException e) {
             log(e.getStatusCode().value(), getStackTrace(e));
@@ -397,16 +480,16 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      * the setApiKey() method.
      *
      * @param entityId ID of the {@link Entity}
-     * @param personId Person ID of the {@link User}
+     * @param hashedEntityEmail hashed email of the {@link User}
      *
      * @return Optional {@link Entity}
      */
-    public Optional<Entity> removeEntityUser(String entityId, String personId) {
+    public Optional<Entity> removeEntityUser(String entityId, String hashedEntityEmail) {
 
         if (debug) {
              log(Constant.CITIZEN_GENERAL_INFO, "DEBUG: Remove user from entity: " +
                      "(entityId: " + entityId + ", " +
-                     "personId: " + personId + ")");
+                     "hashedUserEmail: " + hashedEntityEmail + ")");
         }
 
         if (apiKey != null) {
@@ -418,8 +501,8 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         }
 
         try {
-            Entity entity = restClient.delete(Constant.CITIZEN_ENTITY_RESOURCE + "/" + entityId + "/users/" + personId, null, Entity.class);
-            log(Constant.CITIZEN_REST_SUCCESS, "INFO: removed user: " + personId + " from entity: " + entityId);
+            Entity entity = restClient.delete(Constant.CITIZEN_ENTITY_RESOURCE + "/" + entityId + "/entity-user/" + hashedEntityEmail, null, Entity.class);
+            log(Constant.CITIZEN_REST_SUCCESS, "INFO: removed user: " + hashedEntityEmail + " from entity: " + entityId);
             return Optional.of(entity);
         } catch (HttpStatusCodeException e) {
             log(e.getStatusCode().value(), getStackTrace(e));
@@ -442,6 +525,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      *
      * @return Optional {@link Entity}
      */
+    @Deprecated
     public Optional<Entity> updateEntityAdmin(String entityId, String personId, boolean isAdmin) {
 
         if (debug) {
@@ -476,9 +560,9 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      *
      * @param entityId ID of the {@link Entity}
      *
-     * @return Optional {@link UserWrapper}
+     * @return Optional {@link EntityUserDetailsWrapper}
      */
-    public Optional<UserWrapper> getEntityUsers(String entityId) {
+    public Optional<EntityUserDetailsWrapper> getEntityUsers(String entityId) {
 
         if (debug) {
              log(Constant.CITIZEN_GENERAL_INFO, "DEBUG: Get entity users for entity: " + entityId);
@@ -487,15 +571,17 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         if (apiKey != null) {
             restClient.clearApiHeaders();
             restClient.setApiKey(apiKey);
+            restClient.setSecret(secret);
         } else {
             log(Constant.CITIZEN_REST_GENERAL_ERROR, "ERROR: API key not set");
             return Optional.empty();
         }
 
         try {
-            UserWrapper userWrapper = restClient.get(Constant.CITIZEN_ENTITY_RESOURCE + "/" + entityId + "/users", UserWrapper.class);
+            EntityUserDetailsWrapper userDetailsWrapper = restClient.get(
+                Constant.CITIZEN_ENTITY_RESOURCE + "/" + entityId + "/users", EntityUserDetailsWrapper.class);
             log(Constant.CITIZEN_REST_SUCCESS, "INFO: Got entity users for entity: " + entityId);
-            return Optional.of(userWrapper);
+            return Optional.of(userDetailsWrapper);
         } catch (HttpStatusCodeException e) {
             log(e.getStatusCode().value(), getStackTrace(e));
         } catch (RestException e) {
@@ -1089,6 +1175,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      *
      * @return Optional String identifier to determine the session on the Citizen Service
      */
+    @Deprecated
     public Optional<String> sendJwtLoginTokenToUser(String entityId, String userEmail, String sessionIdentifier) {
 
         if (debug) {
@@ -1124,7 +1211,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
         jwtLoginParameters.setCitizenSessionNonce(citizenNonce);
 
         try {
-            restClient.post(Constant.CITIZEN_SESSION_RESOURCE + "/entity/" + entityId + "/authenticateUserWithTokenAndJWTWebSocket", jwtLoginParameters, Void.class);
+            restClient.post(Constant.CITIZEN_SESSION_RESOURCE + "/entity/authenticate-user-with-token-and-JWT-over-WebSocket", jwtLoginParameters, Void.class);
             log(Constant.CITIZEN_REST_SUCCESS, "INFO: Sent JWT login token to user: " + userEmail);
         } catch (HttpStatusCodeException e) {
             log(e.getStatusCode().value(), getStackTrace(e));
@@ -1150,6 +1237,7 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
      * @param nonce the Citizen identifier returned by sendJwtLoginTokenToUser() to identify the session.
      * @param callback {@link JwtOverStompCallback} to receive the JWT.
      */
+    @Deprecated
     public void setupStompClientAndReceiveJwt(String nonce, JwtOverStompCallback callback) {
 
         if (debug) {
@@ -1989,6 +2077,10 @@ public class CitizenApi implements WebStompClient.LoggingCallback {
 
     public void setApiSecure(boolean apiSecure) {
         this.apiSecure = apiSecure;
+    }
+
+    public void disableTlsCertCheck() {
+        this.restClient.disableTlsCertCheck();
     }
 
     public void updateRestParameters() {
