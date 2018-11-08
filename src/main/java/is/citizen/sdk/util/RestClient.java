@@ -4,6 +4,11 @@ import is.citizen.sdk.exception.RestException;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,6 +19,12 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.RestClientException;
 
+import javax.net.ssl.SSLContext;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,24 +32,28 @@ import java.util.List;
 public class RestClient {
     public String apiHost = Constant.CITIZEN_PRODUCTION_API_HOST;
     public int apiPort = Constant.CITIZEN_PRODUCTION_API_PORT;
-    public boolean apiSecure = Constant.CITIZEN_PRODUCTION_API_SECURE;
+    public boolean apiUseTls = Constant.CITIZEN_PRODUCTION_API_USE_TLS;
 
     public String BaseUrl;
 
     private static RestClient instance;
 
     private RestTemplate restTemplate;
+    private HttpComponentsClientHttpRequestFactory requestFactory;
 
     private String apiKey;
     private String secret;
     private String signature;
 
     public RestClient() {
+
         // This is added as a workaround to a Java bug with HTTP PATCH requests.
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        requestFactory = new HttpComponentsClientHttpRequestFactory();
         requestFactory.setConnectTimeout(30000);
         requestFactory.setReadTimeout(30000);
+
         restTemplate = new RestTemplate();
+
         MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter();
         messageConverter.getObjectMapper().disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
         restTemplate.getMessageConverters().add(messageConverter);
@@ -46,7 +61,7 @@ public class RestClient {
 
         BaseUrl = "";
 
-        if (apiSecure) {
+        if (apiUseTls) {
             BaseUrl = "https://";
         } else {
             BaseUrl = "http://";
@@ -197,7 +212,7 @@ public class RestClient {
     public void setApiHost(String apiHost) {
         BaseUrl = "";
 
-        if (apiSecure) {
+        if (apiUseTls) {
             BaseUrl = "https://";
         } else {
             BaseUrl = "http://";
@@ -211,7 +226,7 @@ public class RestClient {
     public void setApiPort(int apiPort) {
         BaseUrl = "";
 
-        if (apiSecure) {
+        if (apiUseTls) {
             BaseUrl = "https://";
         } else {
             BaseUrl = "http://";
@@ -225,7 +240,7 @@ public class RestClient {
     public void setApiSecure(boolean apiSecure) {
         BaseUrl = "";
 
-        if (apiSecure) {
+        if (apiUseTls) {
             BaseUrl = "https://";
         } else {
             BaseUrl = "http://";
@@ -233,6 +248,26 @@ public class RestClient {
 
         BaseUrl += apiHost + ":" + apiPort + "/";
 
-        this.apiSecure = apiSecure;
+        this.apiUseTls = apiSecure;
+    }
+
+    public void disableTlsCertCheck() {
+        try {
+            TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+                @Override
+                public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                    return true;
+                }
+            };
+
+            SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new NoopHostnameVerifier());
+            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
+
+            requestFactory.setHttpClient(httpClient);
+
+        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            throw new RestException(e.getMessage());
+        }
     }
 }

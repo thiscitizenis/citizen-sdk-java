@@ -11,6 +11,8 @@ public class JwtLoginParameters implements Serializable {
 
     private String citizenSessionNonce;
 
+    private String browserPublicKey;
+
     public String getUserEmail() {
         return userEmail;
     }
@@ -35,6 +37,14 @@ public class JwtLoginParameters implements Serializable {
         this.citizenSessionNonce = citizenSessionNonce;
     }
 
+    public String getBrowserPublicKey() {
+        return browserPublicKey;
+    }
+
+    public void setBrowserPublicKey(String browserPublicKey) {
+        this.browserPublicKey = browserPublicKey;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -45,7 +55,9 @@ public class JwtLoginParameters implements Serializable {
         if (userEmail != null ? !userEmail.equals(that.userEmail) : that.userEmail != null) return false;
         if (thirdPartySessionIdentifier != null ? !thirdPartySessionIdentifier.equals(that.thirdPartySessionIdentifier) : that.thirdPartySessionIdentifier != null)
             return false;
-        return citizenSessionNonce != null ? citizenSessionNonce.equals(that.citizenSessionNonce) : that.citizenSessionNonce == null;
+        if (citizenSessionNonce != null ? !citizenSessionNonce.equals(that.citizenSessionNonce) : that.citizenSessionNonce != null)
+            return false;
+        return browserPublicKey != null ? browserPublicKey.equals(that.browserPublicKey) : that.browserPublicKey == null;
     }
 
     @Override
@@ -53,6 +65,7 @@ public class JwtLoginParameters implements Serializable {
         int result = userEmail != null ? userEmail.hashCode() : 0;
         result = 31 * result + (thirdPartySessionIdentifier != null ? thirdPartySessionIdentifier.hashCode() : 0);
         result = 31 * result + (citizenSessionNonce != null ? citizenSessionNonce.hashCode() : 0);
+        result = 31 * result + (browserPublicKey != null ? browserPublicKey.hashCode() : 0);
         return result;
     }
 
@@ -62,6 +75,8 @@ public class JwtLoginParameters implements Serializable {
                 "userEmail='" + userEmail + '\'' +
                 ", thirdPartySessionIdentifier='" + thirdPartySessionIdentifier + '\'' +
                 ", citizenSessionNonce='" + citizenSessionNonce + '\'' +
+                ", browserPublicKey='" + browserPublicKey + '\'' +
                 '}';
     }
 }
+

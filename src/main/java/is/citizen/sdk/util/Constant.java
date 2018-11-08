@@ -4,22 +4,28 @@ public final class Constant {
     private Constant() {
     }
 
-    public static final String  CITIZEN_PRODUCTION_API_HOST               = "api.citizen.is";
-    public static final int     CITIZEN_PRODUCTION_API_PORT               = 443;
-    public static final boolean CITIZEN_PRODUCTION_API_SECURE             = true;
+    public static final String  CITIZEN_PRODUCTION_API_HOST                = "api.citizen.is";
+    public static final int     CITIZEN_PRODUCTION_API_PORT                = 443;
+    public static final boolean CITIZEN_PRODUCTION_API_USE_TLS             = true;
 
-    public static final String  CITIZEN_DEVELOPMENT_API_HOST               = "development.citizen.is";
+    public static final String  CITIZEN_DEVELOPMENT_API_HOST               = "testapi.citizen.is";
     public static final int     CITIZEN_DEVELOPMENT_API_PORT               = 443;
-    public static final boolean CITIZEN_DEVELOPMENT_API_SECURE             = true;
+    public static final boolean CITIZEN_DEVELOPMENT_API_USE_TLS            = true;
 
-    public static final String  CITIZEN_USER_RESOURCE                      = "users",
-                                CITIZEN_SESSION_RESOURCE                   = "sessions",
-                                CITIZEN_TOKEN_RESOURCE                     = "tokens",
-                                CITIZEN_PERSON_RESOURCE                    = "persons",
-                                CITIZEN_PHONE_RESOURCE                     = "phones",
-                                CITIZEN_WEBAPP_RESOURCE                    = "webapp",
-                                CITIZEN_ENTITY_RESOURCE                    = "entities",
-                                CITIZEN_PUBLIC_RESOURCE                    = "public";
+    public static final String  CITIZEN_LOCAL_API_HOST                     = "localhost";
+    public static final int     CITIZEN_LOCAL_API_PORT                     = 8443;
+    public static final boolean CITIZEN_LOCAL_API_USE_TLS                  = true;
+
+    private static final String CITIZEN_API_VERSION                        = "v1";
+
+    public static final String  CITIZEN_USER_RESOURCE                      = CITIZEN_API_VERSION + "/users",
+                                CITIZEN_SESSION_RESOURCE                   = CITIZEN_API_VERSION + "/sessions",
+                                CITIZEN_TOKEN_RESOURCE                     = CITIZEN_API_VERSION + "/tokens",
+                                CITIZEN_PERSON_RESOURCE                    = CITIZEN_API_VERSION + "/persons",
+                                CITIZEN_PHONE_RESOURCE                     = CITIZEN_API_VERSION + "/phones",
+                                CITIZEN_WEBAPP_RESOURCE                    = CITIZEN_API_VERSION + "/webapp",
+                                CITIZEN_ENTITY_RESOURCE                    = CITIZEN_API_VERSION + "/entities",
+                                CITIZEN_PUBLIC_RESOURCE                    = CITIZEN_API_VERSION + "/public";
 
     public static final String  CITIZEN_AUTHORISATION_HEADER_NAME          = "AuthorizationCitizen",
                                 CITIZEN_SECRET_HEADER_NAME                 = "X-code",

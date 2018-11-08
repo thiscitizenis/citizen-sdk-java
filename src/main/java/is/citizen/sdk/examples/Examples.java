@@ -2,6 +2,7 @@ package is.citizen.sdk.examples;
 
 import is.citizen.sdk.crypto.KeyHolder;
 import is.citizen.sdk.enums.*;
+import is.citizen.sdk.exception.CitizenApiException;
 import is.citizen.sdk.resource.*;
 
 import is.citizen.sdk.api.CitizenApi;
@@ -28,11 +29,19 @@ public class Examples {
         // Initialise the Citizen api.
         //
 
+        // CitizenApi citizenApi = new CitizenApi();
+        // citizenApi.setApiHost(Constant.CITIZEN_LOCAL_API_HOST);
+        // citizenApi.setApiPort(Constant.CITIZEN_LOCAL_API_PORT);
+        // citizenApi.setApiSecure(Constant.CITIZEN_LOCAL_API_USE_TLS);
+        // citizenApi.updateRestParameters();
+        // citizenApi.disableTlsCertCheck();
+
         CitizenApi citizenApi = new CitizenApi();
-        citizenApi.setApiHost("localhost");
-        citizenApi.setApiPort(8443);
-        citizenApi.setApiSecure(false);
+        citizenApi.setApiHost(Constant.CITIZEN_DEVELOPMENT_API_HOST);
+        citizenApi.setApiPort(Constant.CITIZEN_DEVELOPMENT_API_PORT);
+        citizenApi.setApiSecure(Constant.CITIZEN_DEVELOPMENT_API_USE_TLS);
         citizenApi.updateRestParameters();
+        citizenApi.disableTlsCertCheck();
 
         citizenApi.registerLoggingCallback((status, message) -> {
             System.out.println("LOG: status: " + status + ", message: " + message);
@@ -42,10 +51,11 @@ public class Examples {
         // Generate a key pair for authentication.
         //
 
-        Optional<KeyHolder> authKeyHolder = citizenApi.generateAuthKeyPair("secret");
+        KeyHolder authKeyHolder = citizenApi.generateAuthKeyPair("secret")
+            .orElseThrow(CitizenApiException::new);
 
-        String authPublicKey = authKeyHolder.get().getPublicKey();
-        String authPrivateKey = authKeyHolder.get().getPrivateKey();
+        String authPublicKey = authKeyHolder.getPublicKey();
+        String authPrivateKey = authKeyHolder.getPrivateKey();
 
         System.out.println("********************************");
         System.out.println("Generated key pair:");
@@ -57,8 +67,10 @@ public class Examples {
         // Convert the key pair to Java PublicKey and PrivateKey objects.
         //
 
-        PublicKey javaAuthPublicKey = citizenApi.convertAuthPublicKeyStringToJava(authPublicKey).get();
-        PrivateKey javaAuthPrivateKey = citizenApi.convertAuthPrivateKeyStringToJava(authPrivateKey, "secret").get();
+        PublicKey javaAuthPublicKey = citizenApi.convertAuthPublicKeyStringToJava(authPublicKey)
+            .orElseThrow(CitizenApiException::new);
+        PrivateKey javaAuthPrivateKey = citizenApi.convertAuthPrivateKeyStringToJava(authPrivateKey, "secret")
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Converted auth key pair to Java PublicKey and PrivateKey objects");
@@ -68,23 +80,26 @@ public class Examples {
         // Generate a key pair for encryption.
         //
 
-        Optional<KeyHolder> cryptoKeyHolder = citizenApi.generateAuthKeyPair("secret");
+        KeyHolder cryptoKeyHolder = citizenApi.generateAuthKeyPair("secret")
+            .orElseThrow(CitizenApiException::new);
 
-        String cryptoPublicKey = authKeyHolder.get().getPublicKey();
-        String cryptoPrivateKey = authKeyHolder.get().getPrivateKey();
+        String cryptoPublicKey = cryptoKeyHolder.getPublicKey();
+        String cryptoPrivateKey = cryptoKeyHolder.getPrivateKey();
 
         System.out.println("********************************");
         System.out.println("Generated key pair:");
-        System.out.println("Public key: " + authPublicKey);
-        System.out.println("Private key: " + authPrivateKey);
+        System.out.println("Public key: " + cryptoPrivateKey);
+        System.out.println("Private key: " + cryptoPrivateKey);
         System.out.println("********************************\n");
 
         //
         // Convert the key pair to Java PublicKey and PrivateKey objects.
         //
 
-        PublicKey javaCryptoPublicKey = citizenApi.convertAuthPublicKeyStringToJava(cryptoPublicKey).get();
-        PrivateKey javaCryptoPrivateKey = citizenApi.convertAuthPrivateKeyStringToJava(cryptoPrivateKey, "secret").get();
+        PublicKey javaCryptoPublicKey = citizenApi.convertAuthPublicKeyStringToJava(cryptoPublicKey)
+            .orElseThrow(CitizenApiException::new);
+        PrivateKey javaCryptoPrivateKey = citizenApi.convertAuthPrivateKeyStringToJava(cryptoPrivateKey, "secret")
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Converted crypto key pair to Java PublicKey and PrivateKey objects");
@@ -98,7 +113,12 @@ public class Examples {
         String userEmail = username + "@test.com";
         String passPhrase = "Test12";
 
-        User user = citizenApi.createUser(username, userEmail, passPhrase, authPublicKey).get();
+        User user = citizenApi.createUser(
+            username,
+            userEmail,
+            passPhrase,
+            authPublicKey)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Created user: ");
@@ -126,16 +146,22 @@ public class Examples {
         // Add a few details for the user.
         //
 
-        citizenApi.setPersonName(user.getPersonId(), "John", "Paul", "Doe", NameTitle.MR.toString());
+        citizenApi.setPersonName(
+            user.getPersonId(),
+            "John",
+            "Paul",
+            "Doe",
+            NameTitle.MR.toString());
 
-        citizenApi.setPersonAddress(user.getPersonId(),
-                                    "1 Main Street",
-                                    "Main Avenue",
-                                    "Mainville",
-                                    "London",
-                                    CountryName.GB,
-                                    "111 ABC",
-                                    AddressType.HOME);
+        citizenApi.setPersonAddress(
+            user.getPersonId(),
+            "1 Main Street",
+            "Main Avenue",
+            "Mainville",
+            "London",
+            CountryName.GB,
+            "111 ABC",
+            AddressType.HOME);
 
         DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
         DateTime dateOfBirth = formatter.parseDateTime("01/01/1980 23:00:00");
@@ -150,7 +176,8 @@ public class Examples {
         // Log in with signature.
         //
 
-        user = citizenApi.loginWithSignature(userEmail, authPrivateKey, "secret").get();
+        user = citizenApi.loginWithSignature(userEmail, authPrivateKey, "secret")
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Log in with signature: ");
@@ -167,10 +194,12 @@ public class Examples {
         TokenDurationType durationType = TokenDurationType.MONTH;
         int duration = 6;
 
-        Token token_1 = citizenApi.createToken(userEmail,
-                                               access,
-                                               durationType,
-                                               duration).get();
+        Token token_1 = citizenApi.createToken(
+            userEmail,
+            access,
+            durationType,
+            duration)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Created token: ");
@@ -182,10 +211,12 @@ public class Examples {
         durationType = TokenDurationType.WEEK;
         duration = 2;
 
-        Token token_2 = citizenApi.createToken(userEmail,
-                                               access,
-                                               durationType,
-                                               duration).get();
+        Token token_2 = citizenApi.createToken(
+            userEmail,
+            access,
+            durationType,
+            duration)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Created token: ");
@@ -200,10 +231,12 @@ public class Examples {
         citizenApi.setApiKey(userApiKey);
         citizenApi.setSecret(userSecret);
 
-        Token token_3 = citizenApi.createToken(userEmail,
-                                               access,
-                                               durationType,
-                                               duration).get();
+        Token token_3 = citizenApi.createToken(
+            userEmail,
+            access,
+            durationType,
+            duration)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Created token: ");
@@ -214,7 +247,8 @@ public class Examples {
         // Get tokens belonging to the user.
         //
 
-        TokenWrapper userTokens = citizenApi.getUserTokens().get();
+        TokenWrapper userTokens = citizenApi.getUserTokens()
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Fetched user tokens: ");
@@ -227,7 +261,8 @@ public class Examples {
         // Get tokens belonging to the requester.
         //
 
-        TokenWrapper requesterTokens = citizenApi.getRequesterTokens().get();
+        TokenWrapper requesterTokens = citizenApi.getRequesterTokens()
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Fetched requester tokens: ");
@@ -242,7 +277,8 @@ public class Examples {
 
         String userTokenId = userTokens.getTokens().get(0).getId();
 
-        Token token = citizenApi.getToken(userTokenId).get();
+        Token token = citizenApi.getToken(userTokenId)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Fetched individual token: ");
@@ -255,7 +291,8 @@ public class Examples {
 
         String grantedTokenId = userTokens.getTokens().get(0).getId();
 
-        token = citizenApi.grantToken(token).get();
+        token = citizenApi.grantToken(token)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Grant token:");
@@ -268,7 +305,8 @@ public class Examples {
 
         String declinedTokenId = userTokens.getTokens().get(1).getId();
 
-        token = citizenApi.declineToken(declinedTokenId).get();
+        token = citizenApi.declineToken(declinedTokenId)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Decline token:");
@@ -289,7 +327,8 @@ public class Examples {
         // Sign a token.
         //
 
-        Token signedToken = citizenApi.signToken(token_3, authPrivateKey, "secret").get();
+        Token signedToken = citizenApi.signToken(token_3, authPrivateKey, "secret")
+            .orElseThrow(CitizenApiException::new);
 
         //
         // Verify the signed token.
@@ -315,23 +354,25 @@ public class Examples {
         String entityAdminEmail = UUID.randomUUID().toString() + "@test.com";
         String entityAdminPassword = "Test1234";
 
-        Entity entity = citizenApi.createEntity(entityUsername,
-                                                entityEmail,
-                                                entityPassword,
-                                                entityPassphrase,
-                                                "Megacorp Holdings Ltd",
-                                                entityAdminEmail,
-                                                entityAdminPassword,
-                                                "Megacorp",
-                                                "12345678",
-                                                "1 Main Road",
-                                                "Main Avenue",
-                                                "Mainville",
-                                                "London",
-                                                CountryName.GB,
-                                                "123 ABC",
-                                                "12345678",
-                                                CountryCode.GB).get();
+        Entity entity = citizenApi.createEntity(
+            entityUsername,
+            entityEmail,
+            entityPassword,
+            entityPassphrase,
+            "Megacorp Holdings Ltd",
+            entityAdminEmail,
+            entityAdminPassword,
+            "Megacorp",
+            "12345678",
+            "1 Main Road",
+            "Main Avenue",
+            "Mainville",
+            "London",
+            CountryName.GB,
+            "123 ABC",
+            "12345678",
+            CountryCode.GB)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Create entity:");
@@ -342,7 +383,8 @@ public class Examples {
         // Log in with the entity admin user to get its API key.
         //
 
-        User entityAdminUser = citizenApi.loginWithUsernameAndPassword(entityAdminEmail, entityPassword).get();
+        User entityAdminUser = citizenApi.loginWithUsernameAndPassword(entityAdminEmail, entityPassword)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Log in as entity admin:");
@@ -355,7 +397,8 @@ public class Examples {
         // Get the entity admin user's secret.
         //
 
-        String entityAdminSecret = citizenApi.getUserSecret(entityAdminEmail, entityPassphrase).get();
+        String entityAdminSecret = citizenApi.getUserSecret(entityAdminEmail, entityPassphrase)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Get entity admin secret:");
@@ -373,7 +416,8 @@ public class Examples {
         citizenApi.setApiKey(entityAdminApiKey);
         citizenApi.setSecret(entityAdminSecret);
 
-        entity = citizenApi.getEntity(entityId).get();
+        entity = citizenApi.getEntity(entityId)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Get entity:");
@@ -388,7 +432,8 @@ public class Examples {
         EventType.add(webHookEventType, EventType.TOKEN_GRANTED_BY_USER);
         EventType.add(webHookEventType, EventType.TOKEN_DECLINED_BY_USER);
 
-        entity = citizenApi.addEntityWebHook(entityId, webHookEventType, "http://www.test.com/citizenWebHook").get();
+        entity = citizenApi.addEntityWebHook(entityId, webHookEventType, "http://www.test.com/citizenWebHook")
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Register entity web hook:");
@@ -399,45 +444,49 @@ public class Examples {
         // Remove the entity web hook.
         //
 
-        entity = citizenApi.removeEntityWebHook(entityId, webHookEventType, "http://www.test.com/citizenWebHook").get();
+        entity = citizenApi.removeEntityWebHook(entityId, webHookEventType, "http://www.test.com/citizenWebHook")
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Remove entity web hook:");
         System.out.println("Web hooks: " + entity.getWebHooks().toString());
         System.out.println("********************************");
 
-        //
-        // Create a couple users and add them to the entity.
-        //
 
         String entityUsername1 = UUID.randomUUID().toString();
         String entityUserEmail1 = entityUsername1 + "@test.com";
         String entityUserPassPhrase1 = "Test12";
         String entityUserEntityEmail1 = UUID.randomUUID().toString() + "@test.com";
 
-        User entityUser1 = citizenApi.createUser(entityUsername1, entityUserEmail1, entityUserPassPhrase1, null).get();
+        User entityUser1 = citizenApi.createUser(entityUsername1, entityUserEmail1, entityUserPassPhrase1, null)
+            .orElseThrow(CitizenApiException::new);
 
         String entityUsername2 = UUID.randomUUID().toString();
         String entityUserEmail2 = entityUsername2 + "@test.com";
         String entityUserPassPhrase2 = "Test12";
         String entityUserEntityEmail2 = UUID.randomUUID().toString() + "@test.com";
 
-        User entityUser2 = citizenApi.createUser(entityUsername2, entityUserEmail2, entityUserPassPhrase2, null).get();
+        User entityUser2 = citizenApi.createUser(entityUsername2, entityUserEmail2, entityUserPassPhrase2, null)
+            .orElseThrow(CitizenApiException::new);
 
         // First we add the entity email to the user.
 
         citizenApi.setApiKey(entityUser1.getApiKey());
-        entityUser1 = citizenApi.setUserEntity(entityUser1.getId(), entityUserEntityEmail1).get();
+        entityUser1 = citizenApi.setUserEntity(entityUser1.getId(), entityUserEntityEmail1)
+            .orElseThrow(CitizenApiException::new);
         citizenApi.setApiKey(entityUser2.getApiKey());
-        entityUser2 = citizenApi.setUserEntity(entityUser2.getId(), entityUserEntityEmail2).get();
+        entityUser2 = citizenApi.setUserEntity(entityUser2.getId(), entityUserEntityEmail2)
+            .orElseThrow(CitizenApiException::new);
 
         // Then we add all users with this entity email to the entity.
 
         citizenApi.setApiKey(entityAdminApiKey);
         citizenApi.setSecret(entityAdminSecret);
 
-        entity = citizenApi.addEntityUser(entityId, entityUserEntityEmail1).get();
-        entity = citizenApi.addEntityUser(entityId, entityUserEntityEmail2).get();
+        entity = citizenApi.addEntityUser(entityId, entityUserEntityEmail1)
+            .orElseThrow(CitizenApiException::new);
+        entity = citizenApi.addEntityUser(entityId, entityUserEntityEmail2)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Add entity user.");
@@ -447,7 +496,8 @@ public class Examples {
         // Get entity users.
         //
 
-        UserWrapper entityUsers = citizenApi.getEntityUsers(entityId).get();
+        EntityUserDetailsWrapper entityUsers = citizenApi.getEntityUsers(entityId)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Get entity users.");
@@ -455,20 +505,11 @@ public class Examples {
         System.out.println("********************************");
 
         //
-        // Update an entity user to an admin.
-        //
-
-        entity = citizenApi.updateEntityAdmin(entityId, entityUser1.getPersonId(), true).get();
-
-        System.out.println("********************************");
-        System.out.println("Update entity admin.");
-        System.out.println("********************************");
-
-        //
         // Delete a user.
         //
 
-        entity = citizenApi.removeEntityUser(entityId, entityUser1.getPersonId()).get();
+        entity = citizenApi.removeEntityUser(entityId, entityUser1.getEntityEmail())
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Delete entity user.");
@@ -478,7 +519,8 @@ public class Examples {
         // Regenerate the entity's signing key.
         //
 
-        entity = citizenApi.regenerateEntitySigningKey(entityId).get();
+        entity = citizenApi.regenerateEntitySigningKey(entityId)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Regenerate entity signing key:");
@@ -507,12 +549,14 @@ public class Examples {
         // Register an entity data agreement.
         //
 
-        entity = citizenApi.registerDataAgreement(entityId,
-                                                  6,
-                                                  TokenDurationType.MONTH,
-                                                  "Basic Data Agreement",
-                                                  "Marketing",
-                                                  Arrays.asList("HyperMegaCorp", "AddStream", "ClickJungle")).get();
+        citizenApi.registerDataAgreement(
+            entityId,
+            6,
+            TokenDurationType.MONTH,
+            "Basic Data Agreement",
+            "Marketing",
+            Arrays.asList("HyperMegaCorp", "AddStream", "ClickJungle"))
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Register data agreement:");
@@ -528,23 +572,24 @@ public class Examples {
         citizenApi.setApiKey(entityPublicApiKey);
 
         GreyUser greyUser = citizenApi.registerEntityUser(
-                greyUserEmail,                 // User email.
-                "John",                        // First name.
-                "Paul",                        // Middle name.
-                "Doe",                         // Last name.
-                NameTitle.MR.toString(),       // Title.
-                GenderType.MALE.toString(),    // Gender.
-                dateOfBirth,                   // Date of birth.
-                "1 Main Street",               // Address line 1.
-                "Main Road",                   // Address line 2.
-                "Main Avenue",                 // Address line 3.
-                "London",                      // City.
-                CountryName.GB,                // Country.
-                "123 ABC",                     // Post code.
-                AddressType.HOME,              // Address type.
-                "12345678",                    // Phone number.
-                CountryCode.GB,                // Phone country.
-                PhoneType.HOME).get();         // Phone type.
+            greyUserEmail,                 // User email.
+            "John",                        // First name.
+            "Paul",                        // Middle name.
+            "Doe",                         // Last name.
+            NameTitle.MR.toString(),       // Title.
+            GenderType.MALE.toString(),    // Gender.
+            dateOfBirth,                   // Date of birth.
+            "1 Main Street",               // Address line 1.
+            "Main Road",                   // Address line 2.
+            "Main Avenue",                 // Address line 3.
+            "London",                      // City.
+            CountryName.GB,                // Country.
+            "123 ABC",                     // Post code.
+            AddressType.HOME,              // Address type.
+            "12345678",                    // Phone number.
+            CountryCode.GB,                // Phone country.
+            PhoneType.HOME)                // Phone type.
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Register entity grey user:");
@@ -559,50 +604,13 @@ public class Examples {
         citizenApi.setApiKey(entityApiKey);
         citizenApi.setSecret(entitySecret);
 
-        UserCheck userCheck = citizenApi.checkEntityUserExists(entityUserEmail2).get();
+        UserCheck userCheck = citizenApi.checkEntityUserExists(entityUserEmail2)
+            .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
         System.out.println("Check if an entity user exists:");
         System.out.println("Result: " + userCheck.getUserExists());
         System.out.println("********************************");
-
-        //
-        // Get JWT via web socket.
-        //
-
-        // First send the token.
-
-        String citizenNonce = citizenApi.sendJwtLoginTokenToUser(entityId, userEmail, "12345678").get();
-
-        // Next wait for the JWT to be delivered via web socket after the user has approved it.
-
-        String signingPublicKey = entity.getSigningPublicKey();
-
-        citizenApi.setupStompClientAndReceiveJwt(citizenNonce, jwt -> {
-            boolean verified = citizenApi.verifyJwt(jwt, signingPublicKey);
-
-            System.out.println("********************************");
-            System.out.println("Entity login with JWT:");
-            System.out.println("JWT valid: " + verified);
-            System.out.println("********************************");
-        });
-
-        // Finally, simulate the user approving the token for demo purposes.
-
-        citizenApi.setApiKey(userApiKey);
-        citizenApi.setSecret(userSecret);
-
-        String webTokenId = null;
-        userTokens = citizenApi.getUserTokens().get();
-        for (Token userToken : userTokens.getTokens()) {
-            if (userToken.getTokenStatus() == TokenStatus.WEB_ACCESS_REQUEST) {
-                webTokenId = userToken.getId();
-            }
-        }
-
-        Token webToken = citizenApi.getToken(webTokenId).get();
-
-        webToken = citizenApi.grantToken(webToken).get();
     }
 
     public static void generateAuthKeyPair(String password) {
@@ -613,10 +621,11 @@ public class Examples {
             }
         });
 
-        Optional<KeyHolder> keyHolder = citizenApi.generateAuthKeyPair(password);
+        KeyHolder keyHolder = citizenApi.generateAuthKeyPair(password)
+            .orElseThrow(CitizenApiException::new);
 
-        String publicKey = keyHolder.get().getPublicKey();
-        String privateKey = keyHolder.get().getPrivateKey();
+        String publicKey = keyHolder.getPublicKey();
+        String privateKey = keyHolder.getPrivateKey();
 
         System.out.println("\nAuth Public Key:");
         System.out.println(publicKey);
@@ -633,10 +642,11 @@ public class Examples {
             }
         });
 
-        Optional<KeyHolder> keyHolder = citizenApi.generateCryptoKeyPair(password);
+        KeyHolder keyHolder = citizenApi.generateCryptoKeyPair(password)
+            .orElseThrow(CitizenApiException::new);
 
-        String publicKey = keyHolder.get().getPublicKey();
-        String privateKey = keyHolder.get().getPrivateKey();
+        String publicKey = keyHolder.getPublicKey();
+        String privateKey = keyHolder.getPrivateKey();
 
         System.out.println("\nCrypto Public Key:");
         System.out.println(publicKey);

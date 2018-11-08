@@ -37,7 +37,6 @@ The project has examples of the following operations, which can be found in Exam
   - Register a third party entity data agreement.
   - Register a third party entity grey user.
   - Check if a third party entity user exists.
-  - Log in with a third party entity signed JSON Web Token.
 
 The project can be built with the command:
 
