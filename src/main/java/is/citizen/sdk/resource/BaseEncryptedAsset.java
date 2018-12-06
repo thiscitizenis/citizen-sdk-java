@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Created by tjech on 22/08/2016.
  */
-public class BaseEncryptedAsset  implements Serializable
+public class BaseEncryptedAsset implements Serializable
     {
         private static final long serialVersionUID = 8529598365947124732L;
         protected String id;
@@ -36,7 +36,7 @@ public class BaseEncryptedAsset  implements Serializable
         this.data = data;
         }
 
-    // putting this back in the DTOs so we can do local cryptoold
+    // putting this back in the DTOs so we can do local crypto
     public String getEncryptedKey() { return encryptedKey; }
 
     public void setEncryptedKey(String encryptedKey) { this.encryptedKey = encryptedKey; }

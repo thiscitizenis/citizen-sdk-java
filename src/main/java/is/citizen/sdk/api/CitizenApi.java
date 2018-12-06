@@ -7,6 +7,7 @@ import is.citizen.sdk.enums.*;
 import is.citizen.sdk.exception.CryptoException;
 import is.citizen.sdk.exception.RestException;
 import is.citizen.sdk.resource.*;
+import is.citizen.sdk.resource.token.*;
 import is.citizen.sdk.util.Constant;
 import is.citizen.sdk.util.RestClient;
 import is.citizen.sdk.util.WebStompClient;

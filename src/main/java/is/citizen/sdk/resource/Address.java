@@ -1,6 +1,8 @@
 package is.citizen.sdk.resource;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import is.citizen.sdk.enums.AddressType;
+import is.citizen.sdk.enums.CountryName;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -8,9 +10,6 @@ import org.joda.time.DateTime;
 
 import java.io.Serializable;
 import java.util.Objects;
-
-import is.citizen.sdk.enums.AddressType;
-import is.citizen.sdk.enums.CountryName;
 
 public class Address implements Serializable {
 
@@ -235,9 +234,6 @@ public class Address implements Serializable {
             return true;
         }
         if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        if (!super.equals(obj)) {
             return false;
         }
         final Address other = (Address) obj;

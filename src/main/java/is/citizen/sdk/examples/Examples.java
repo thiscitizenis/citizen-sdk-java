@@ -4,6 +4,7 @@ import is.citizen.sdk.crypto.KeyHolder;
 import is.citizen.sdk.enums.*;
 import is.citizen.sdk.exception.CitizenApiException;
 import is.citizen.sdk.resource.*;
+import is.citizen.sdk.resource.token.*;
 
 import is.citizen.sdk.api.CitizenApi;
 import is.citizen.sdk.util.Constant;
@@ -29,19 +30,18 @@ public class Examples {
         // Initialise the Citizen api.
         //
 
-        // CitizenApi citizenApi = new CitizenApi();
-        // citizenApi.setApiHost(Constant.CITIZEN_LOCAL_API_HOST);
-        // citizenApi.setApiPort(Constant.CITIZEN_LOCAL_API_PORT);
-        // citizenApi.setApiSecure(Constant.CITIZEN_LOCAL_API_USE_TLS);
-        // citizenApi.updateRestParameters();
-        // citizenApi.disableTlsCertCheck();
-
         CitizenApi citizenApi = new CitizenApi();
-        citizenApi.setApiHost(Constant.CITIZEN_DEVELOPMENT_API_HOST);
-        citizenApi.setApiPort(Constant.CITIZEN_DEVELOPMENT_API_PORT);
-        citizenApi.setApiSecure(Constant.CITIZEN_DEVELOPMENT_API_USE_TLS);
+        citizenApi.setApiHost(Constant.CITIZEN_LOCAL_API_HOST);
+        citizenApi.setApiPort(Constant.CITIZEN_LOCAL_API_PORT);
+        citizenApi.setApiSecure(Constant.CITIZEN_LOCAL_API_USE_TLS);
         citizenApi.updateRestParameters();
         citizenApi.disableTlsCertCheck();
+
+        // CitizenApi citizenApi = new CitizenApi();
+        // citizenApi.setApiHost(Constant.CITIZEN_DEVELOPMENT_API_HOST);
+        // citizenApi.setApiPort(Constant.CITIZEN_DEVELOPMENT_API_PORT);
+        // citizenApi.setApiSecure(Constant.CITIZEN_DEVELOPMENT_API_USE_TLS);
+        // citizenApi.updateRestParameters();
 
         citizenApi.registerLoggingCallback((status, message) -> {
             System.out.println("LOG: status: " + status + ", message: " + message);
@@ -58,7 +58,7 @@ public class Examples {
         String authPrivateKey = authKeyHolder.getPrivateKey();
 
         System.out.println("********************************");
-        System.out.println("Generated key pair:");
+        System.out.println("Generated auth key pair:");
         System.out.println("Public key: " + authPublicKey);
         System.out.println("Private key: " + authPrivateKey);
         System.out.println("********************************\n");
@@ -80,15 +80,15 @@ public class Examples {
         // Generate a key pair for encryption.
         //
 
-        KeyHolder cryptoKeyHolder = citizenApi.generateAuthKeyPair("secret")
+        KeyHolder cryptoKeyHolder = citizenApi.generateCryptoKeyPair("secret")
             .orElseThrow(CitizenApiException::new);
 
         String cryptoPublicKey = cryptoKeyHolder.getPublicKey();
         String cryptoPrivateKey = cryptoKeyHolder.getPrivateKey();
 
         System.out.println("********************************");
-        System.out.println("Generated key pair:");
-        System.out.println("Public key: " + cryptoPrivateKey);
+        System.out.println("Generated crypto key pair:");
+        System.out.println("Public key: " + cryptoPublicKey);
         System.out.println("Private key: " + cryptoPrivateKey);
         System.out.println("********************************\n");
 
@@ -96,9 +96,9 @@ public class Examples {
         // Convert the key pair to Java PublicKey and PrivateKey objects.
         //
 
-        PublicKey javaCryptoPublicKey = citizenApi.convertAuthPublicKeyStringToJava(cryptoPublicKey)
+        PublicKey javaCryptoPublicKey = citizenApi.convertCryptoPublicKeyStringToJava(cryptoPublicKey)
             .orElseThrow(CitizenApiException::new);
-        PrivateKey javaCryptoPrivateKey = citizenApi.convertAuthPrivateKeyStringToJava(cryptoPrivateKey, "secret")
+        PrivateKey javaCryptoPrivateKey = citizenApi.convertCryptoPrivateKeyStringToJava(cryptoPrivateKey, "secret")
             .orElseThrow(CitizenApiException::new);
 
         System.out.println("********************************");
@@ -655,15 +655,21 @@ public class Examples {
         System.out.println(privateKey);
     }
 
+    public static void usage() {
+        System.err.println("Usage: -runExamples | -authKey <secret> | -cryptoKey <secret>");
+    }
+
     public static void main(String[] args) {
 
         Options options = new Options();
 
         Option authKey = new Option("a", "authKey", true, "auth key secret");
         options.addOption(authKey);
-        Option cryptoKey = new Option("a", "cryptoKey", true, "crypto key secret");
+        Option cryptoKey = new Option("c", "cryptoKey", true, "crypto key secret");
         options.addOption(cryptoKey);
         Option runExamples = new Option("runExamples", "run examples");
+        Option help = new Option("h", "help", false, "display help");
+        options.addOption(help);
         options.addOption(runExamples);
 
         CommandLineParser parser = new GnuParser();
@@ -685,10 +691,13 @@ public class Examples {
                 }
             } else if (line.hasOption("runExamples")) {
                 Examples.runExamples();
+
+            } else if (line.hasOption("help")) {
+                usage();
             } else {
-                System.err.println("Incorrect usage.");
+                usage();
             }
-        } catch(ParseException e) {
+        } catch (ParseException e) {
             System.err.println("Arugment parsing failed: " + e.getMessage());
         }
     }

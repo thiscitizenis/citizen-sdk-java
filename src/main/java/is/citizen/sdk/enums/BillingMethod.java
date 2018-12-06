@@ -3,5 +3,6 @@ package is.citizen.sdk.enums;
 public enum BillingMethod {
     NONE,
     CITIZEN,
-    AWS_MARKETPLACE
+    AWS_MARKETPLACE,
+    CHARGEBEE
 }

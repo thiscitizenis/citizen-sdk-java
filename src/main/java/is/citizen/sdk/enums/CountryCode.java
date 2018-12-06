@@ -252,6 +252,7 @@ public enum CountryCode
         VU(678),
         WF(681),
         WS(685),
+        XK(383),
         YE(967),
         YT(262),
         ZA(27),

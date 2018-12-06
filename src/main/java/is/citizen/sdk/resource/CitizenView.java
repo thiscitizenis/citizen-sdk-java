@@ -26,7 +26,7 @@ public interface CitizenView {
         }
 
         /**
-         * //TODO: examples this, why default inclusion is set to true
+         * //TODO: test this, why default inclusion is set to true
          */
         interface FixMe {
 
