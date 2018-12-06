@@ -3,15 +3,14 @@ package is.citizen.sdk.resource;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.joda.ser.DateTimeSerializer;
+import is.citizen.sdk.enums.CountryCode;
+import is.citizen.sdk.enums.PhoneType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.joda.time.DateTime;
 
 import java.io.Serializable;
 import java.util.Objects;
-
-import is.citizen.sdk.enums.CountryCode;
-import is.citizen.sdk.enums.PhoneType;
 
 public class Phone implements Serializable {
 
@@ -108,9 +107,7 @@ public class Phone implements Serializable {
         final Phone other = (Phone) obj;
         return Objects.equals(this.countryCode, other.countryCode) &&
                Objects.equals(this.phoneNumber, other.phoneNumber) &&
-               Objects.equals(this.id, other.id) &&
                Objects.equals(this.phoneType, other.phoneType) && Objects.equals(this.smsConfirmCode, other.smsConfirmCode) &&
-               Objects.equals(this.smsConfirmTime, other.smsConfirmTime) &&
                Objects.equals(this.smsConfirmed, other.smsConfirmed);
     }
 

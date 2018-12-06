@@ -5,6 +5,7 @@ public enum TokenStatus {
     GRANTED,
     DECLINED,
     EXPIRED,
+    WEB_TOKEN_TIMEOUT,
     PUBLIC,
     MORE_INFO,
     WEB_ACCESS_REQUEST,

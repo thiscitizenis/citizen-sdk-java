@@ -1,12 +1,12 @@
 package is.citizen.sdk.resource;
 
+import is.citizen.sdk.enums.EventType;
+import is.citizen.sdk.resource.token.Token;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import is.citizen.sdk.enums.EventType;
 
 public class WebHookRequestBody implements Serializable {
     private static final long serialVersionUID = 1175307180508399404L;
@@ -15,7 +15,7 @@ public class WebHookRequestBody implements Serializable {
     private Token token;
     private Person person;
     private List<Document> documents;
-    private String jsonWebToken;
+    private JwtEncryptionDetails jwtEncryptionDetails;
 
     public WebHookRequestBody() {
     }
@@ -67,12 +67,12 @@ public class WebHookRequestBody implements Serializable {
         return this;
     }
 
-    public String getJsonWebToken() {
-        return jsonWebToken;
+    public JwtEncryptionDetails getJwtEncryptionDetails() {
+        return jwtEncryptionDetails;
     }
 
-    public WebHookRequestBody setJsonWebToken(String jsonWebToken) {
-        this.jsonWebToken = jsonWebToken;
+    public WebHookRequestBody setJwtEncryptionDetails(JwtEncryptionDetails jwtEncryptionDetails) {
+        this.jwtEncryptionDetails = jwtEncryptionDetails;
         return this;
     }
 

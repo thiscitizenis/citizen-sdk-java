@@ -1,17 +1,16 @@
-package is.citizen.sdk.resource;
+package is.citizen.sdk.resource.token;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.joda.ser.DateTimeSerializer;
+import is.citizen.sdk.enums.*;
+import is.citizen.sdk.resource.BaseEncryptedAsset;
+import is.citizen.sdk.resource.CitizenView;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.joda.time.DateTime;
 
 import java.util.Objects;
-
-import is.citizen.sdk.enums.AccessType;
-import is.citizen.sdk.enums.TokenDurationType;
-import is.citizen.sdk.enums.TokenStatus;
 
 public class Token extends BaseEncryptedAsset {
 
@@ -22,9 +21,13 @@ public class Token extends BaseEncryptedAsset {
 
     private String name;
 
+    private TokenType tokenType;
+
     private TokenStatus tokenStatus;
 
     private String hashedUserEmail;
+
+    private String encryptedUserEmail;
 
     private String userUsername;
 
@@ -62,6 +65,14 @@ public class Token extends BaseEncryptedAsset {
     private DateTime creationDate;
 
     private String issuingDomain;
+
+    private String purpose;
+
+    private CrmIntegrationType integrationType;
+
+    private String hashedIntegrationIdentifier;
+
+    private String encryptedIntegrationIdentifier;
 
     // TODO  avoid of using these constants
     public final static int
@@ -137,7 +148,9 @@ public class Token extends BaseEncryptedAsset {
 
     public String getName() { return name; }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public int amountOfRequestedAddresses() {
         return getRequestedAmountOfAddresses(getAccess());
@@ -161,6 +174,14 @@ public class Token extends BaseEncryptedAsset {
 
     public void setHashedUserEmail(String hashedUserEmail) {
         this.hashedUserEmail = hashedUserEmail;
+    }
+
+    public String getEncryptedUserEmail() {
+        return encryptedUserEmail;
+    }
+
+    public void setEncryptedUserEmail(String encryptedUserEmail) {
+        this.encryptedUserEmail = encryptedUserEmail;
     }
 
     public String getHashedRequesterEmail() {
@@ -269,6 +290,14 @@ public class Token extends BaseEncryptedAsset {
         this.userEmail = userEmail;
     }
 
+    public TokenType getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(TokenType tokenType) {
+        this.tokenType = tokenType;
+    }
+
     public TokenStatus getTokenStatus() {
         return tokenStatus;
     }
@@ -336,11 +365,43 @@ public class Token extends BaseEncryptedAsset {
         this.issuingDomain = issuingDomain;
     }
 
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
+
+    public CrmIntegrationType getIntegrationType() {
+        return integrationType;
+    }
+
+    public void setIntegrationType(CrmIntegrationType integrationType) {
+        this.integrationType = integrationType;
+    }
+
+    public String getHashedIntegrationIdentifier() {
+        return hashedIntegrationIdentifier;
+    }
+
+    public void setHashedIntegrationIdentifier(String hashedIntegrationIdentifier) {
+        this.hashedIntegrationIdentifier = hashedIntegrationIdentifier;
+    }
+
+    public String getEncryptedIntegrationIdentifier() {
+        return encryptedIntegrationIdentifier;
+    }
+
+    public void setEncryptedIntegrationIdentifier(String encryptedIntegrationIdentifier) {
+        this.encryptedIntegrationIdentifier = encryptedIntegrationIdentifier;
+    }
+
     @Override
     public int hashCode() {
         return Objects
-                .hash(id, tokenStatus, userUsername, duration, durationType, expiryDate, creationDate,
-                        access, requesterUsername, hashedRequesterEmail);
+                .hash(id, tokenType, tokenStatus, userUsername, encryptedUserEmail, duration, durationType, expiryDate, creationDate,
+                        access, requesterUsername, hashedRequesterEmail, purpose);
     }
 
     @Override
@@ -354,6 +415,7 @@ public class Token extends BaseEncryptedAsset {
         final Token other = (Token) obj;
         return Objects.equals(this.id, other.id) &&
                 Objects.equals(this.userUsername, other.userUsername) &&
+                Objects.equals(this.tokenType, other.tokenType) &&
                 Objects.equals(this.tokenStatus, other.tokenStatus) &&
                 Objects.equals(this.duration, other.duration) &&
                 Objects.equals(this.access, other.access) &&
@@ -363,6 +425,8 @@ public class Token extends BaseEncryptedAsset {
                 Objects.equals(this.requesterUsername, other.requesterUsername) &&
                 Objects.equals(this.hashedRequesterEmail, other.hashedRequesterEmail) &&
                 Objects.equals(this.hashedUserEmail, other.hashedUserEmail) &&
+                Objects.equals(this.encryptedUserEmail, other.encryptedUserEmail) &&
+                Objects.equals(this.purpose, other.purpose) &&
                 Objects.equals(this.durationType, other.durationType);
     }
 

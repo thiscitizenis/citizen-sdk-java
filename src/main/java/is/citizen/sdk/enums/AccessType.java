@@ -7,8 +7,9 @@ public enum AccessType {
     NATIONALITY  (1 << 3), // 8
     ADDRESS      (1 << 4), // 16
     PHONE        (1 << 5), // 32
-    GENDER       (1 << 6),
-    EMAIL        (1 << 7),
+    GENDER       (1 << 6), // 64
+    EMAIL        (1 << 7), // 128
+    CARD_ON_FILE (1 << 8), // 256
 
     WEB_ACCESS   (1 << 10), // 1024
 
@@ -37,12 +38,24 @@ public enum AccessType {
         this.value = value;
     }
 
-    private int getValue() {
+    public int getValue() {
         return value;
     }
 
     public static boolean contains(int value, AccessType accessType) {
         return (value & accessType.getValue()) > 0;
+    }
+
+    public static boolean contains(int targetAccess, int accessToCheck) {
+        for (AccessType accessType : AccessType.values()) {
+            if ((accessToCheck & accessType.getValue()) > 0) {
+                if ((targetAccess & accessType.getValue()) == 0) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public static int add(int value, AccessType accessType) {
@@ -51,6 +64,14 @@ public enum AccessType {
         }
 
         return (value + accessType.getValue());
+    }
+
+    public static int add(int currentAccess, int extraAccess) {
+        if (verify(extraAccess)) {
+            return currentAccess | extraAccess;
+        }
+
+        return currentAccess;
     }
 
     public static int remove(int value, AccessType accessType) {

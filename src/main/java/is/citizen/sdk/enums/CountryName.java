@@ -507,8 +507,9 @@ public enum CountryName
     /**Zimbabwe*/
     ZW("Zimbabwe"),
     /**Åland Islands*/
-    AX("Åland Islands");
-
+    AX("Åland Islands"),
+    /**Kosovo**/
+    XK("Kosovo");
     /**
      * Dialing code for country
      */

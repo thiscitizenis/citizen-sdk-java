@@ -33,6 +33,18 @@ public final class UserCheck implements Serializable {
     @JsonView(CitizenView.User.Verify.class)
     private boolean claimCodeCorrect;
 
+    /**
+     * Says if the user has a secret.
+     */
+    @JsonView(CitizenView.User.Verify.class)
+    private boolean hasSecret;
+
+    /**
+     * Says if the emailed checked is confirmed.
+     */
+    @JsonView(CitizenView.User.Verify.class)
+    private boolean emailConfirmed;
+
     public void setUserExists(boolean userExists) {
         this.userExists = userExists;
     }
@@ -65,6 +77,22 @@ public final class UserCheck implements Serializable {
         this.claimCodeCorrect = claimCodeCorrect;
     }
 
+    public boolean isHasSecret() {
+        return hasSecret;
+    }
+
+    public void setHasSecret(boolean hasSecret) {
+        this.hasSecret = hasSecret;
+    }
+
+    public boolean isEmailConfirmed() {
+        return emailConfirmed;
+    }
+
+    public void setEmailConfirmed(boolean emailConfirmed) {
+        this.emailConfirmed = emailConfirmed;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -73,13 +101,19 @@ public final class UserCheck implements Serializable {
         UserCheck userCheck = (UserCheck) o;
 
         if (userExists != userCheck.userExists) return false;
-        return greyUserExists == userCheck.greyUserExists;
+        if (greyUserExists != userCheck.greyUserExists) return false;
+        if (emailCodeCorrect != userCheck.emailCodeCorrect) return false;
+        if (claimCodeCorrect != userCheck.claimCodeCorrect) return false;
+        return hasSecret == userCheck.hasSecret;
     }
 
     @Override
     public int hashCode() {
         int result = (userExists ? 1 : 0);
         result = 31 * result + (greyUserExists ? 1 : 0);
+        result = 31 * result + (emailCodeCorrect ? 1 : 0);
+        result = 31 * result + (claimCodeCorrect ? 1 : 0);
+        result = 31 * result + (hasSecret ? 1 : 0);
         return result;
     }
 

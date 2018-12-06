@@ -1,4 +1,4 @@
-package is.citizen.ums.resource;
+package is.citizen.sdk.resource;
 
 import java.io.Serializable;
 import java.util.ArrayList;

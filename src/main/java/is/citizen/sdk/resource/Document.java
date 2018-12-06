@@ -1,10 +1,9 @@
 package is.citizen.sdk.resource;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import is.citizen.sdk.enums.DocumentType;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.joda.time.DateTime;
-
-import is.citizen.sdk.enums.DocumentType;
 
 public class Document extends BaseEncryptedAsset {
 
@@ -34,6 +33,8 @@ public class Document extends BaseEncryptedAsset {
     private boolean isPhotoID;
     private boolean isAddressValidation;
     private boolean isFaceValidated;
+
+    private byte[] livenessData;
 
     public String getTokenID() {
         return tokenID;
@@ -127,6 +128,14 @@ public class Document extends BaseEncryptedAsset {
 
     public void setDocumentId(String documentId) {
         this.documentId = documentId;
+    }
+
+    public byte[] getLivenessData() {
+        return livenessData;
+    }
+
+    public void setLivenessData(byte[] livenessData) {
+        this.livenessData = livenessData;
     }
 
     @Override
